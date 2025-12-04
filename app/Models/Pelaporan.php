@@ -17,6 +17,11 @@ class Pelaporan extends Model
 
     public function feedback()
     {
-        return $this->belongsTo(Feedback::class);
+        return $this->hasOne(Feedback::class);
+    }
+
+    public function feedbackReply()
+    {
+        return $this->hasOneThrough(FeedbackReply::class, Feedback::class);
     }
 }

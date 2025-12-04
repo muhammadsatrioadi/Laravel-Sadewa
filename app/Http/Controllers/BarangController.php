@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Merk;
 use App\Models\Barang;
 use App\Models\Lokasi;
-use App\Models\Feedback;
 use App\Models\Kategori;
 use App\Models\Pelaporan;
 use Endroid\QrCode\QrCode;
@@ -95,14 +94,15 @@ if (!Storage::disk('public')->exists($qrCodePath)) {
     public function show(string $id)
     {
         $barang = Barang::findOrFail($id);
-        $pelaporan = Pelaporan::where('barang_id', $barang->id)->get();
-        $feedback = Feedback::where('pelaporan_id', $barang->id)->first();
+        $pelaporans = Pelaporan::where('barang_id', $barang->id)
+            ->with('feedback')
+            ->orderByDesc('updated_at')
+            ->get();
         $qrCode = new QrCode($barang->kd_barang);
 
         return view('barang.show', [
             'barang' => $barang,
-            'pelaporans' => $pelaporan,
-            'feedback' => $feedback,
+            'pelaporans' => $pelaporans,
             'qrCode' => $qrCode
         ]);
     }

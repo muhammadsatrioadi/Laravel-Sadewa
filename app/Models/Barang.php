@@ -24,4 +24,9 @@ class Barang extends Model
     {
         return $this->belongsTo(Merk::class);
     }
+
+    public function pelaporans()
+    {
+        return $this->hasMany(Pelaporan::class);
+    }
 }

@@ -10,13 +10,13 @@ class Feedback extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
-    public function pelaporans()
+    public function pelaporan()
     {
-        return $this->hasMany(Pelaporan::class);
+        return $this->belongsTo(Pelaporan::class);
     }
 
-    public function feedbackReply()
+    public function reply()
     {
-        return $this->belongsTo(Feedback::class);
+        return $this->hasOne(FeedbackReply::class);
     }
 }

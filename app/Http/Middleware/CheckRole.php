@@ -10,15 +10,24 @@ class CheckRole
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = auth()->user();
-        if (in_array($user->role->role, $roles)) {
-            return $next($request);
+
+        // Cek kalau user tidak punya relasi role
+        if (!$user || !$user->role) {
+            abort(403, 'Akses ditolak: Role tidak ditemukan.');
         }
-        abort(403, 'Tidak ada akses !');
+
+        // Ambil nama role di tabel roles
+        $userRole = $user->role->role ?? null;
+
+        // Cek apakah role user sesuai
+        if (!in_array($userRole, $roles)) {
+            abort(403, 'Akses ditolak: Anda tidak memiliki izin.');
+        }
+
+        return $next($request);
     }
 }

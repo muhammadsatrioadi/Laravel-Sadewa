@@ -20,10 +20,10 @@ class PelaporanSelesaiController extends Controller
 
     public function cetakLaporan($id)
     {
-        $pelaporan = Pelaporan::find($id);
-        $feedback       = Feedback::where('pelaporan_id', $pelaporan->id)->first();
-        $feedbackReply  = $feedback ? FeedbackReply::where('feedback_id', $feedback->id)->first() : null;
-
+        $pelaporan = Pelaporan::with(['barang.kategori', 'barang.merk', 'barang.lokasi', 'feedback.reply'])
+            ->findOrFail($id);
+        $feedback = $pelaporan->feedback;
+        $feedbackReply = $feedback ? $feedback->reply : null;
 
         $pdf = PDF::loadView('pelaporan-selesai.cetak-laporan', [
             'pelaporan'    => $pelaporan,

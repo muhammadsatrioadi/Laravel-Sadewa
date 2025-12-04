@@ -44,9 +44,12 @@ class TambahPelaporanController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'barang_id' => 'required|exists:barangs,id',
             'judul'     => 'required',
             'deskripsi' => 'required'
         ], [
+            'barang_id.required'  => 'Silakan scan QR barang terlebih dahulu',
+            'barang_id.exists'    => 'Barang tidak ditemukan',
             'judul.required'        => 'Form wajib diisi !',
             'deskripsi.required'    => 'Form wajib diisi !'
         ]);

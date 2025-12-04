@@ -20,9 +20,10 @@ class CekPelaporanController extends Controller
 
     public function detail($id)
     {
-        $pelaporan      = Pelaporan::find($id);
-        $feedback       = Feedback::where('pelaporan_id', $pelaporan->id)->first();
-        $feedbackReply  = $feedback ? FeedbackReply::where('feedback_id', $feedback->id)->first() : null;
+        $pelaporan = Pelaporan::with(['barang.kategori', 'barang.merk', 'barang.lokasi', 'feedback.reply'])
+            ->findOrFail($id);
+        $feedback = $pelaporan->feedback;
+        $feedbackReply = $feedback ? $feedback->reply : null;
 
         return view('cek-pelaporan.detail', [
             'pelaporan'     => $pelaporan,
@@ -33,7 +34,11 @@ class CekPelaporanController extends Controller
 
     public function store(Request $request, $id)
     {
-        $feedback = Feedback::find($id);
+        $feedback = Feedback::where('pelaporan_id', $id)->first();
+
+        if (!$feedback) {
+            return back()->withErrors(['feedback_replies' => 'Feedback admin belum tersedia'])->withInput();
+        }
         $validator = Validator::make($request->all(), [
             'feedback_replies'  => 'required'
         ], [
@@ -44,10 +49,10 @@ class CekPelaporanController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        FeedbackReply::create([
-            'feedback_id'       => $feedback->id,
-            'feedback_replies'  => $request->feedback_replies,
-        ]);
+        FeedbackReply::updateOrCreate(
+            ['feedback_id' => $feedback->id],
+            ['feedback_replies' => $request->feedback_replies]
+        );
 
         return redirect()->back()->with('success', 'Berhasil menambahkan feedback baru');
     }

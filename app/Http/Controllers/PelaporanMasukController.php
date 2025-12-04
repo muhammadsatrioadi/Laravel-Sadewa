@@ -19,9 +19,10 @@ class PelaporanMasukController extends Controller
 
     public function detail($id)
     {
-        $pelaporan      = Pelaporan::findOrFail($id);
-        $feedback       = Feedback::where('pelaporan_id', $pelaporan->id)->first();
-        $feedbackReply  = $feedback ? FeedbackReply::where('feedback_id', $feedback->id)->first() : null;
+        $pelaporan = Pelaporan::with(['barang.kategori', 'barang.merk', 'barang.lokasi', 'feedback.reply'])
+            ->findOrFail($id);
+        $feedback = $pelaporan->feedback;
+        $feedbackReply = $feedback ? $feedback->reply : null;
         return view('pelaporan-masuk.detail', [
             'pelaporan'     => $pelaporan,
             'feedback'      => $feedback,
@@ -40,14 +41,19 @@ class PelaporanMasukController extends Controller
     public function selesai(Request $request, $id)
     {
         $pelaporan = Pelaporan::findOrFail($id);
-        $pelaporan->update(['status' => 'selesai']);
 
-        $feedback = new Feedback([
-            'pelaporan_id'       => $request->pelaporan_id,
-            'analisis_perbaikan' => $request->analisis_perbaikan,
+        $validator = $request->validate([
+            'analisis_perbaikan' => 'required|string'
+        ], [
+            'analisis_perbaikan.required' => 'Analisis perbaikan wajib diisi'
         ]);
 
-        $feedback->save();
+        $pelaporan->update(['status' => 'selesai']);
+
+        Feedback::updateOrCreate(
+            ['pelaporan_id' => $pelaporan->id],
+            ['analisis_perbaikan' => $validator['analisis_perbaikan']]
+        );
 
         return redirect()->back()->with('success', 'Berhasil mengubah status pelaporan menjadi Selesai');
     }

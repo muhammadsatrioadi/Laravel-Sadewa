@@ -14,22 +14,27 @@ class ScanController extends Controller
             return response()->json(['error' => 'QR data tidak ditemukan'], 400);
         }
 
-        // QR yang dikirim adalah JSON → decode
-        $qrData = json_decode($request->qr, true);
+        $rawPayload = $request->qr;
+        $decoded = json_decode($rawPayload, true);
 
-        if (!$qrData) {
-            return response()->json(['error' => 'Format QR tidak valid'], 400);
+        $barang = null;
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            $byId = $decoded['id'] ?? null;
+            $byKode = $decoded['kd_barang'] ?? null;
+
+            if ($byId) {
+                $barang = Barang::find($byId);
+            }
+
+            if (!$barang && $byKode) {
+                $barang = Barang::where('kd_barang', $byKode)->first();
+            }
         }
 
-        // Ambil ID dari isi QR
-        $id = $qrData['id'] ?? null;
-
-        if (!$id) {
-            return response()->json(['error' => 'ID tidak ditemukan dalam QR'], 400);
+        if (!$barang) {
+            $barang = Barang::where('kd_barang', $rawPayload)->first();
         }
-
-        // Cari barang di tabel
-        $barang = Barang::where('id', $id)->first();
 
         if (!$barang) {
             return response()->json(['error' => 'Barang tidak ditemukan'], 404);

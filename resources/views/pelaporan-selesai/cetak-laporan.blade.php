@@ -115,12 +115,12 @@
                 <tr>
                     <td><b>Analisis Perbaikan</b></td>
                     <td>:</td>
-                    <td>{{ $feedback->analisis_perbaikan }}</td>
+                    <td>{{ $feedback->analisis_perbaikan ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td><b>Feedback User</b></td>
                     <td>:</td>
-                    <td>{{ $feedbackReply->feedback_replies }}</td>
+                    <td>{{ $feedbackReply->feedback_replies ?? 'Belum ada feedback' }}</td>
                 </tr>
             </table>
         </div>

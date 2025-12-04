@@ -83,15 +83,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($pelaporans as $pelaporan)
+                                @forelse ($pelaporans as $pelaporan)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $pelaporan->judul }}</td>
                                         <td>{{ $pelaporan->deskripsi }}</td>
-                                        <td>{{ $feedback->analisis_perbaikan }}</td>
+                                        <td>{{ $pelaporan->feedback->analisis_perbaikan ?? '-' }}</td>
                                         <td>{{ $pelaporan->updated_at }}</td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">Belum ada riwayat perbaikan</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
